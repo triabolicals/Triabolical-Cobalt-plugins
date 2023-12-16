@@ -1,0 +1,27 @@
+[package]
+name = "PermHP"
+version = "0.1.0"
+authors = ["triabolical"]
+edition = "2021"
+
+[package.metadata.skyline]
+titleid = "01006A800016E000" # Smash Ultimate
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+skyline = "0.2.0"
+unity = { git = "https://github.com/DivineDragonFanClub/unity" }
+engage = { git = "https://github.com/DivineDragonFanClub/engage"}
+cobapi = { version = "0.1", git = "https://github.com/DivineDragonFanClub/cobapi" }
+
+[patch."https:github.com/DivineDragonFanClub/engage"]
+engage = {path = "/Users/trile/Project/lib/engage/"}
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
