@@ -79,7 +79,7 @@ pub fn main() {
     let negative99 = &[0x61, 0x0C, 0x80, 0x12];
     // Enhance limit change to -99 to 99
     for x in BUFF_POS {
-        Patch::in_text(*x-0x4).bytes(negative99);
-        Patch::in_text(*x).bytes(postive99);
+        Patch::in_text(*x).bytes(negative99);
+        Patch::in_text(*x+0x4).bytes(postive99);
     }
 }
