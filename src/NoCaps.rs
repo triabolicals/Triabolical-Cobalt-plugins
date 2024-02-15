@@ -37,28 +37,23 @@ pub fn job_set_limit(this: &JobData, value :&Capability, method_info: OptionalMe
 
 pub fn set_job_caps(){
     unsafe {
-        let triabolical = PersonData::get_list_mut().expect("triabolical is 'None'");
-        let t_list = &triabolical.list.items;
-        let triabolical2 = JobData::get_list_mut().expect("triabolical2 is 'None'");
-        let t_list2 = &triabolical2.list.items;
-        let job_count: usize = JobData::get_count() as usize;
-        let person_count: usize = PersonData::get_count() as usize;
-        for x in 0..person_count {
+        let t_list = PersonData::get_list_mut().expect("triabolical is 'None'");
+        let t_list2 = JobData::get_list_mut().expect("triabolical2 is 'None'");
+        for x in 0..t_list.len() {
             //Setting personal caps to 0
             let caps = get_limit(t_list[x], None);
             for i in 0..11 { caps.m_Data[i] = 0; }
         }
-        for x in 0..job_count {
+        for x in 0..t_list2.len() {
             //Setting job caps to 127 + Base
-            let job = &t_list2[x];
-            let cap = job_get_limit(job, None);
-            let base = job_get_base(job, None);
+            let cap = job_get_limit(t_list2[x], None);
+            let base = job_get_base(t_list2[x], None);
             for i in 0..10 { 
                 cap.m_Data[i] = 127 + base.m_Data[i];
              }
             //Move Cap is set to 99
             cap.m_Data[10] = 99;
-            job_set_limit(job, cap, None);
+            job_set_limit(t_list2[x], cap, None);
         }
     }
     println!("Job Caps are set to 127 + base and Person Caps are set to 0");
