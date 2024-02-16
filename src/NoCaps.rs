@@ -2,7 +2,7 @@
 use unity::prelude::*;
 use unity::{il2cpp::class::Il2CppRGCTXData, prelude::*};
 use unity::il2cpp::object::Array;
-use engage::gamedata::{*, person::*, unit::*};
+use engage::gamedata::{*, unit::*};
 use engage::{sequence::*, gamevariable::*, gameuserdata::*};
 use skyline::patching::Patch;
 use cobapi::Event;
@@ -31,6 +31,9 @@ pub fn job_get_limit(this: &JobData, method_info: OptionalMethod) -> & mut Capab
 
 #[unity::from_offset("App", "JobData", "get_Base")]
 pub fn job_get_base(this: &JobData, method_info: OptionalMethod) -> & mut Capability;
+
+#[skyline::from_offset(0x1f26000)]
+pub fn get_limit(this: &PersonData, method_info: OptionalMethod) -> & mut Capability;
 
 #[unity::from_offset("App", "JobData", "set_Limit")]
 pub fn job_set_limit(this: &JobData, value :&Capability, method_info: OptionalMethod);
