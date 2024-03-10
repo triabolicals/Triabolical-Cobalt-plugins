@@ -15,9 +15,8 @@ skyline = "0.2.0"
 unity = { git = "https://github.com/DivineDragonFanClub/unity" }
 engage = { git = "https://github.com/DivineDragonFanClub/engage"}
 cobapi = { version = "0.1", git = "https://github.com/DivineDragonFanClub/cobapi" }
-
-[patch."https:github.com/DivineDragonFanClub/engage"]
-engage = {path = "/Users/trile/Project/lib/engage/"}
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8.0"
 
 [profile.dev]
 panic = "abort"
