@@ -1,13 +1,10 @@
 #![feature(lazy_cell, ptr_sub_ptr)]
 use unity::prelude::*;
-use unity::{il2cpp::class::Il2CppRGCTXData, prelude::*};
-use unity::il2cpp::object::Array;
-use engage::gamedata::{*, unit::*};
-use engage::{sequence::*, gamevariable::*, gameuserdata::*};
+use engage::gamedata::{*, job::*, unit::*};
 use skyline::patching::Patch;
-use cobapi::Event;
-use cobapi::SystemEvent;
+use cobapi::{Event, SystemEvent};
 
+// offset for the -20:20 limit to change to -99:99
 pub const BUFF_POS: &[usize] = &[
     0x01a1c92c,    0x01a1c95c,     0x01a1c990,    0x01a1c9c4, 
     0x01a1c9f8,    0x01a1ca30,     0x01a1ca68,    0x01a1ca9c, 
@@ -21,54 +18,34 @@ pub const BUFF_POS: &[usize] = &[
     0x01f77bbc,    0x01f77bf0,     0x01f77c28,    0x01f77c60, 
     0x01f77c94,    0x01f77cc8,     0x01f77d00,    0x01f77d38, 
 ];
-#[unity::class("App","Capability")]
-pub struct Capability {
-    pub m_Data: &'static mut Array<u8>,
-}
-
-#[unity::from_offset("App", "JobData", "get_Limit")]
-pub fn job_get_limit(this: &JobData, method_info: OptionalMethod) -> & mut Capability;
-
-#[unity::from_offset("App", "JobData", "get_Base")]
-pub fn job_get_base(this: &JobData, method_info: OptionalMethod) -> & mut Capability;
-
-#[skyline::from_offset(0x1f26000)]
-pub fn get_limit(this: &PersonData, method_info: OptionalMethod) -> & mut Capability;
-
-#[unity::from_offset("App", "JobData", "set_Limit")]
-pub fn job_set_limit(this: &JobData, value :&Capability, method_info: OptionalMethod);
-
 pub fn set_job_caps(){
-    unsafe {
-        let t_list = PersonData::get_list_mut().expect("triabolical is 'None'");
-        let t_list2 = JobData::get_list_mut().expect("triabolical2 is 'None'");
-        for x in 0..t_list.len() {
-            //Setting personal caps to 0
-            let caps = get_limit(t_list[x], None);
-            for i in 0..11 { caps.m_Data[i] = 0; }
-        }
-        for x in 0..t_list2.len() {
+    let persons = PersonData::get_list_mut().expect("triabolical is 'None'");
+    let jobs = JobData::get_list_mut().expect("triabolical2 is 'None'");
+    for x in 0..persons.len() {
+        let caps = persons[x].get_limit();
+        for i in 0..11 { caps[i] = 0; }
+    }
+    for x in 0..jobs.len() {
             //Setting job caps to 127 + Base
-            let cap = job_get_limit(t_list2[x], None);
-            let base = job_get_base(t_list2[x], None);
-            for i in 0..10 { 
-                cap.m_Data[i] = 127 + base.m_Data[i];
-             }
-            //Move Cap is set to 99
-            cap.m_Data[10] = 99;
-            job_set_limit(t_list2[x], cap, None);
+        let cap = jobs[x].get_limit();
+        let base = jobs[x].get_base();
+        cap[10] = 99;    // Move cap is 99
+        for i in 0..10 { 
+            cap = 127 + base[i];
         }
     }
     println!("Job Caps are set to 127 + base and Person Caps are set to 0");
 }
 
-extern "C" fn do_job_caps(event: &Event<SystemEvent>) {
+extern "C" fn initalize_random_persons(event: &Event<SystemEvent>) {
     if let Event::Args(ev) = event {
         match ev {
-            SystemEvent::LanguageChanged => {
-                set_job_caps();
-            },
-            _ => {}
+            SystemEvent::ProcInstJump {proc, label } => {
+                if proc.hashcode == -988690862 && *label == 0 { set_job_caps(); }
+                //Reset things
+                if proc.hashcode == -339912801 && *label == 2 { set_job_caps(); }
+            }
+            _ => {},
         }
     } 
     else {  println!("We received a missing event, and we don't care!"); }
