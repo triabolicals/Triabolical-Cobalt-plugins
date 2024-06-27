@@ -23,27 +23,25 @@ pub fn set_job_caps(){
     let jobs = JobData::get_list_mut().expect("triabolical2 is 'None'");
     for x in 0..persons.len() {
         let caps = persons[x].get_limit();
-        for i in 0..11 { caps[i] = 0; }
+        for i in 0..11 { caps[i] = 0; } // personal caps to 0
     }
     for x in 0..jobs.len() {
-            //Setting job caps to 127 + Base
         let cap = jobs[x].get_limit();
         let base = jobs[x].get_base();
-        cap[10] = 99;    // Move cap is 99
+        cap[10] = 99;   // move cap is 99
         for i in 0..10 { 
-            cap = 127 + base[i];
+            cap[i] = 127 + base[i]; //Setting job caps to 127 + Base
         }
     }
     println!("Job Caps are set to 127 + base and Person Caps are set to 0");
 }
 
-extern "C" fn initalize_random_persons(event: &Event<SystemEvent>) {
+extern "C" fn initalize_stat_caps(event: &Event<SystemEvent>) {
     if let Event::Args(ev) = event {
         match ev {
             SystemEvent::ProcInstJump {proc, label } => {
-                if proc.hashcode == -988690862 && *label == 0 { set_job_caps(); }
-                //Reset things
-                if proc.hashcode == -339912801 && *label == 2 { set_job_caps(); }
+                if proc.hashcode == -988690862 && *label == 0 { set_job_caps(); }   //Title Screen
+                if proc.hashcode == -339912801 && *label == 2 { set_job_caps(); }   //When Returning to Title Screen
             }
             _ => {},
         }
@@ -52,14 +50,14 @@ extern "C" fn initalize_random_persons(event: &Event<SystemEvent>) {
 }
 #[skyline::main(name = "Max Stat Caps")]
 pub fn main() {
-    cobapi::register_system_event_handler(do_job_caps);
-    Patch::in_text(0x01a2a7c0).bytes(&[0xe1,0x0e,0x80,0x12]);
-    Patch::in_text(0x01a2a7c4).bytes(&[0x02,0x0f,0x80,0x52]);
+    cobapi::register_system_event_handler(initalize_stat_caps);
+    Patch::in_text(0x01a2a7c0).bytes(&[0xe1,0x0e,0x80,0x12]).unwrap();
+    Patch::in_text(0x01a2a7c4).bytes(&[0x02,0x0f,0x80,0x52]).unwrap();
     let postive99 = &[0xE2, 0x7C, 0x80, 0x52];
     let negative99 = &[0x61, 0x0C, 0x80, 0x12];
     // Enhance limit change to -99 to 99
     for x in BUFF_POS {
-        Patch::in_text(*x).bytes(negative99);
-        Patch::in_text(*x+0x4).bytes(postive99);
+        Patch::in_text(*x).bytes(negative99).unwrap();
+        Patch::in_text(*x+0x4).bytes(postive99).unwrap();
     }
 }
